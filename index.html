@@ -12,6 +12,7 @@ body{
     font-family: Arial;
 }
 
+/* ===== CARTA ===== */
 #carta{
     position:fixed;
     width:100%;
@@ -72,6 +73,7 @@ body{
     100%{ transform:translateY(-120px); opacity:0;}
 }
 
+/* ===== LOADER ===== */
 #loader{
     position:fixed;
     width:100%;
@@ -104,6 +106,7 @@ body{
     100%{ transform:translateX(300%);}
 }
 
+/* ===== CAPAS ===== */
 .layer{
     position:fixed;
     width:100%;
@@ -152,7 +155,7 @@ body{
     </div>
 </div>
 
-<!-- 🎵 AUDIO FUNCIONANDO -->
+<!-- 🎵 AUDIO -->
 <audio id="musica" loop preload="auto" playsinline>
 <source src="https://raw.githubusercontent.com/dania123456789123456-del/Carta-1/main/Jay_Wheeler.mp3" type="audio/mpeg">
 </audio>
@@ -164,6 +167,12 @@ body{
 <script>
 const musica = document.getElementById("musica");
 
+const imagenes=[
+"https://i.postimg.cc/nrt3JvVQ/IMG-20241128-WA0128.jpg",
+"https://i.postimg.cc/CKzPHh6g/IMG-20241128-WA0129.jpg",
+"https://i.postimg.cc/YShgyhHX/IMG-20250202-WA0025.jpg"
+];
+
 const capas=[
 {el:back,speed:3,size:0.7,density:160},
 {el:mid,speed:2.5,size:1,density:120},
@@ -173,16 +182,38 @@ const capas=[
 const textos=["I love you","Te amo 💘","Love you ❤️","Muak 💋"];
 const colores=["white","pink","red"];
 
+/* LLUVIA COMPLETA */
 function crearElemento(layer){
-let el=document.createElement("div");
+let el;
+let tipo=Math.random();
+
+if(tipo<0.5){
+el=document.createElement("div");
+el.className="text";
+el.innerText=textos[Math.floor(Math.random()*textos.length)];
+el.classList.add(colores[Math.floor(Math.random()*colores.length)]);
+}
+else if(tipo<0.8){
+el=document.createElement("div");
 el.className="heart";
 el.innerText="❤";
 el.classList.add(colores[Math.floor(Math.random()*colores.length)]);
+}
+else{
+el=document.createElement("img");
+el.className="imgRain";
+el.src=imagenes[Math.floor(Math.random()*imagenes.length)];
+}
 
 el.style.left=Math.random()*100+"vw";
 el.style.setProperty("--startY",Math.random()*100+"vh");
 el.style.setProperty("--distance",(120+Math.random()*120)+"px");
+
+if(el.tagName==="IMG"){
+el.style.width=(30+Math.random()*40)*layer.size+"px";
+}else{
 el.style.fontSize=(14+Math.random()*16)*layer.size+"px";
+}
 
 let dur=layer.speed+Math.random()*1.5;
 el.style.animation=`caer ${dur}s linear`;
@@ -197,13 +228,46 @@ setInterval(()=>crearElemento(l),l.density);
 });
 }
 
+/* 💥 EXPLOSIÓN */
+document.addEventListener("click",e=>{
+for(let i=0;i<80;i++){
+crearParticula(e.clientX,e.clientY);
+}
+});
+
+function crearParticula(x,y){
+let el=document.createElement("div");
+el.className="heart";
+el.innerText="❤";
+el.classList.add(colores[Math.floor(Math.random()*colores.length)]);
+el.style.position="fixed";
+el.style.left=x+"px";
+el.style.top=y+"px";
+
+let angle=Math.random()*360;
+let distance=80+Math.random()*200;
+
+let dx=Math.cos(angle)*distance+"px";
+let dy=Math.sin(angle)*distance+"px";
+
+el.style.setProperty("--x",dx);
+el.style.setProperty("--y",dy);
+el.style.animation="explosion 1s ease-out forwards";
+
+document.body.appendChild(el);
+setTimeout(()=>el.remove(),1000);
+}
+
+/* 💌 CARTA */
 const sobre=document.getElementById("sobre");
 
 sobre.onclick=()=>{
 
-// 🔥 ACTIVAR AUDIO (MÓVIL)
+// activar audio SIN que suene aún
 musica.muted = true;
 musica.play().then(()=>{
+    musica.pause();
+    musica.currentTime = 0;
     musica.muted = false;
 }).catch(()=>{});
 
@@ -217,8 +281,8 @@ setTimeout(()=>{
         loader.style.display="none";
         iniciarLluvia();
 
-        musica.currentTime = 0;
-        musica.volume = 0.7;
+        // 🔥 AQUÍ empieza la música (sin bloqueo)
+        musica.play().catch(()=>{});
 
     },2500);
 
